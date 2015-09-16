@@ -48,10 +48,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     int list[] = new int[2];
 
 
-
-
-
-
+    int b;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
