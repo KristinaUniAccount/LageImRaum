@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">LageImRaum</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="text">Hallo das ist ein Text</string>
+    <string name="save">speichern</string>
+    <string name="onclick" />
+    <string name="start">Daten zurücksetzen</string>
+    <string name="TextAcc">Acceleration Data</string>
+    <string name="text1">Lagedaten</string>
+    <string name="TEst">Testtext</string>
+    <string name="auswerte">Daten auswerten!</string>
+    <string name="TestFeld">Das ist ein Testfeld</string>
+    <string name="machText">Mach hier was rein</string>
+    <string name="Lage">Hier steht eigentlich die Lage im Raum</string>
+    <string name="Auswerten">Daten auswerten</string>
+    <string name="AuswertungText" />
+    <string name="machText2" />
+    <string name="hint1">Bitte Daten auswerten, um Auswertung zu sehen</string>
+</resources>
