@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -18,8 +19,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.Timestamp;
 
 import static android.hardware.Sensor.TYPE_LINEAR_ACCELERATION;
+import static android.hardware.Sensor.TYPE_MAGNETIC_FIELD;
 import static android.hardware.Sensor.TYPE_ORIENTATION;
 
 
@@ -27,15 +30,16 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
 
     Sensor orientation;
     Sensor acceleration;
+    Sensor compass;
     SensorManager am;
     SensorManager om;
+    SensorManager cm;
     TextView text;
     TextView textAcc;
     TextView machText;
     String Text = "";
     String Text2 = "";
     String Text3 = "";
-    String Text4 = "";
     Button button;
     Button mach;
     int lymax1;
@@ -43,7 +47,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     int lymin;
     int pos;
     int pos2;
-    int counter;
+    int counter = 0;
+    int c = 0;
+    MediaPlayer player;
+    int time;
+    int time2;
+    int time3;
 
     int list[] = new int[2];
 
@@ -61,6 +70,10 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         acceleration = am.getDefaultSensor(TYPE_LINEAR_ACCELERATION);
         am.registerListener(this, acceleration, SensorManager.SENSOR_DELAY_NORMAL);
 
+        cm = (SensorManager) getSystemService(SENSOR_SERVICE);
+        compass = cm.getDefaultSensor(TYPE_MAGNETIC_FIELD);
+        cm.registerListener(this, compass, SensorManager.SENSOR_DELAY_GAME);
+
         text=(TextView)findViewById(R.id.text);
         textAcc = (TextView) findViewById(R.id.textAcc);
         button = (Button) findViewById(R.id.button);
@@ -74,7 +87,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         Text = "";
         Text2= "";
         Text3= "";
-        Text4= "";
+
         lymax1 = 0;
         lymax2 = 0;
         lymin = 500;
@@ -96,9 +109,9 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             if (!Dir.exists()) {
                 Dir.mkdir();
             }
-            File file1 = new File(Dir, "DatenBurpee_Lage.txt");
-            File file2 = new File(Dir, "DatenBurpee_Acc_Z.txt");
-            File file3 = new File(Dir, "DatenBurpee_Acc_Y.txt");
+            File file1 = new File(Dir, "Daten_Lage_X_Achse.txt");
+            File file2 = new File(Dir, "Daten_Lage_Y_Achse.txt");
+            File file3 = new File(Dir, "Daten_Lage_Z_Achse.txt");
 
 
             try {
@@ -133,6 +146,7 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
         }
             else{
             Toast.makeText(getApplicationContext(), "SD-Card not found", Toast.LENGTH_LONG).show();
@@ -168,32 +182,36 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     @Override
     public void onSensorChanged(final SensorEvent event) {
 
+
        if(event.sensor.getType() == Sensor.TYPE_ORIENTATION){
 
-           //text.setText("Drehung auf Y-Achse: " + (int) event.values[1]*(-1) );
+           text.setText("Drehung auf Y-Achse: " + (int) event.values[1]*(-1) );
+
+           int wert = (int) (event.values[1]*(-1));
+
+           Text += (int)event.values[1]*(-1);
+           Text += ", ";
 
 
-           new Thread(new Runnable() {
-               @Override
-               public void run() {
-                   for (int i = 0; i <2; i++){
-                       list[i] = (int) event.values[1];
-                       try {
-                           Thread.sleep(500);
-                       } catch (InterruptedException e) {
-                       }
-                   }
-                   text.setText("array: " + list[0] + "," + list[1]);
+           if ((wert >= 120) && (c == 0)) {
+               c = 1;}
 
-               }
-           }).start();
+           if ((wert <= 40) && (c ==1)){
+               c = 2;}
+
+           if((wert >= 120) && (c == 2)) {
+               c =3;}
+
+           if ((wert>90) && (wert<110) && (c ==3)){
+               counter += 1;
+               machText.setText("Du hast " + counter + " Burpees gemacht! :-) ");
+               c =0;
+               player=MediaPlayer.create(MainActivity.this,R.raw.iphone);
+               player.start();
+
+           }
 
 
-           /**Text += (int)event.values[1] *(-1);
-            Text += "\n";
-
-           Text4 +=(int)event.values[1] *(-1);
-           Text4 += ",";**/
 
        }
 
@@ -201,84 +219,21 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             textAcc.setText("Beschleunigung auf Z-Achse:" + (int)event.values[2] + "\nBeschleunigung auf Y-Achse: " + (int)event.values[1]);
 
             Text2 += (int)event.values[2]*5+100;
-            Text2 += "\n";
+            Text2 += ",";
+
             Text3 += (int)event.values[1]*5+100;
-            Text3 += "\n";
+            Text3 += ",";
+
 
 
         }
 
 
     }
-
-
-
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
     }
 
-
-    public void auswerten(View view) {
-        String[] liste = Text4.split(",");
-        Text4 = "";
-        lymax1 = 0;
-        lymax2 = 0;
-        lymin = 500;
-        pos = 5000;
-        pos2 = 5000;
-        counter = 0;
-
-        for(int i = 0; i< liste.length; i++){
-
-            int v = Math.abs(Integer.parseInt(liste[i]));
-
-            if(v >= 120 &&  i<pos){
-                lymax1 = v;
-                if(v>lymax1){
-                    lymax1 = v;
-                }
-            }
-            else if(v <= 40){
-                lymin = v;
-
-                if(i < pos){
-                    pos =i;}
-
-                if(v<lymin){
-                    lymin = v;
-                }
-            }
-
-            else if(v >=120 && i > pos){
-                lymax2 = v;
-
-                if(i < pos2){
-                pos2 =i;}
-
-                if(v>lymax2){
-                    lymax2 = v;
-                }
-            }
-
-            else if(v>90 && v<110 && i>pos2){
-                counter+=1;
-
-                lymax1=0;
-                lymax2=0;
-                lymin=0;
-                pos=5000;
-                pos2=5000;
-            }
-
-        }
-        machText.setText("Du hast " + counter + " Burpees gemacht! :-) ");
-
-
-    }
-
-
-
 }
-
