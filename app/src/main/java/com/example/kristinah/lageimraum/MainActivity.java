@@ -48,8 +48,12 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
     int pos;
     int pos2;
     int counter = 0;
+    int wert;
+    int wert2;
+    int wertmax = 0;
     int c = 0;
     MediaPlayer player;
+    MediaPlayer player2;
     int time;
     int time2;
     int time3;
@@ -94,6 +98,8 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
         pos = 5000;
         pos2 = 5000;
         counter = 0;
+        wertmax = 0;
+        c = 0;
 
         machText.setText("Bitte Daten auswerten, um Auswertung zu sehen");
     }
@@ -186,37 +192,13 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
        if(event.sensor.getType() == Sensor.TYPE_ORIENTATION){
 
            text.setText("Drehung auf Y-Achse: " + (int) event.values[1]*(-1) );
+            Text += (int)  event.values[1]*(-1);
+            Text += ", ";
 
-           int wert = (int) (event.values[1]*(-1));
+           wert= (int) (Math.sqrt((event.values[1])*(event.values[1])));}
 
-           Text += (int)event.values[1]*(-1);
-           Text += ", ";
-
-
-           if ((wert >= 120) && (c == 0)) {
-               c = 1;}
-
-           if ((wert <= 40) && (c ==1)){
-               c = 2;}
-
-           if((wert >= 120) && (c == 2)) {
-               c =3;}
-
-           if ((wert>90) && (wert<110) && (c ==3)){
-               counter += 1;
-               machText.setText("Du hast " + counter + " Burpees gemacht! :-) ");
-               c =0;
-               player=MediaPlayer.create(MainActivity.this,R.raw.iphone);
-               player.start();
-
-           }
-
-
-
-       }
 
         if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION){
-            textAcc.setText("Beschleunigung auf Z-Achse:" + (int)event.values[2] + "\nBeschleunigung auf Y-Achse: " + (int)event.values[1]);
 
             Text2 += (int)event.values[2]*5+100;
             Text2 += ",";
@@ -224,10 +206,38 @@ public class MainActivity extends ActionBarActivity implements SensorEventListen
             Text3 += (int)event.values[1]*5+100;
             Text3 += ",";
 
+            wert2= (int) (Math.sqrt((event.values[1])*(event.values[1])) + Math.sqrt((event.values[2])*(event.values[2])));
+            textAcc.setText("wert1 " + wert + "\n Wert 2 " + wert2 );
+
+            if (wert2 > wertmax){
+                wertmax = wert2;
+            }
+
 
 
         }
 
+
+        if ((wert >= 120) && (c == 0)) {
+            c = 1;}
+
+        if ((wert <= 40) && (c ==1) ){
+            c = 2;
+            wertmax = 0;
+            player=MediaPlayer.create(MainActivity.this,R.raw.pling);
+            player.start();}
+
+        if((wert >= 120) && (c == 2)) {
+            c =3;}
+
+        if ((wert<110) && (c ==3) && (wertmax > 15)){
+            c =0;
+            wertmax = 0;
+            counter += 1;
+            machText.setText("Du hast " + counter + " Burpees gemacht! :-) ");
+            player2=MediaPlayer.create(MainActivity.this,R.raw.iphone);
+            player2.start();
+            }
 
     }
 
